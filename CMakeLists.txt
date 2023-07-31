@@ -25,4 +25,4 @@ FetchContent_MakeAvailable(googletest)
 
 
 # Add any additional compilation flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O3 -fopenmp")
