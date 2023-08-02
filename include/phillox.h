@@ -1,9 +1,11 @@
+#include <array>
 #include <cstdint>
 #include <iostream>
-#include <array>
 #include <limits>
 
-#define DEVICE 
+#include "base_state.hpp"
+
+namespace {
 
 #ifndef PHILOX_M4x32_0
 #define PHILOX_M4x32_0 ((uint32_t)0xD2511F53)
@@ -19,112 +21,95 @@
 #define PHILOX_W32_1 ((uint32_t)0xBB67AE85)
 #endif
 
+struct Counter {
+  uint32_t v[4];
 
-struct Counter{
-    uint32_t v[4];
+  DEVICE Counter(uint32_t a, uint32_t b, uint32_t c, uint32_t d)
 
-    DEVICE Counter(uint32_t a, uint32_t b, uint32_t c, uint32_t d)
-    
-    {
-        v[0] = a;
-        v[1] = b;
-        v[2] = c;
-        v[3] = d;
-    }
+  {
+    v[0] = a;
+    v[1] = b;
+    v[2] = c;
+    v[3] = d;
+  }
 
-    DEVICE uint32_t& operator[](int i) {
-        return v[i];
-    }
+  DEVICE uint32_t &operator[](int i) { return v[i]; }
+
+  DEVICE uint32_t operator[](int i) const { return v[i]; }
 };
 
+struct Key {
+  uint32_t v[2];
 
-struct Key{
-    uint32_t v[2];
+  DEVICE Key(uint32_t a, uint32_t b) {
+    v[0] = a;
+    v[1] = b;
+  }
 
-    DEVICE Key(uint32_t a, uint32_t b){
-        v[0] = a;
-        v[1] = b;
-    }
+  DEVICE uint32_t &operator[](int i) { return v[i]; }
 
-    DEVICE uint32_t& operator[](int i) {
-        return v[i];
-    }
+  DEVICE uint32_t operator[](int i) const { return v[i]; }
 };
-
 
 inline DEVICE uint32_t mulhilo(uint32_t L, uint32_t R, uint32_t *hip) {
-    uint64_t product = static_cast<uint64_t>(L)*static_cast<uint64_t>(R);
-    *hip = product>>32;
-    return static_cast<uint32_t>(product);
+  uint64_t product = static_cast<uint64_t>(L) * static_cast<uint64_t>(R);
+  *hip = product >> 32;
+  return static_cast<uint32_t>(product);
 }
 
-DEVICE void bumpkey(Key& key ){
-    key[0] += PHILOX_W32_0;
-    key[1] += PHILOX_W32_1;
+DEVICE void bumpkey(Key &key) {
+  key[0] += PHILOX_W32_0;
+  key[1] += PHILOX_W32_1;
 }
 
-DEVICE Counter round(Key& key, Counter& ctr){
-    uint32_t hi0;                                                              
-    uint32_t hi1;                                                              
-    uint32_t lo0 = mulhilo(PHILOX_M4x32_0, ctr[0], &hi0);              
-    uint32_t lo1 = mulhilo(PHILOX_M4x32_1, ctr[2], &hi1);              
-    return Counter(hi1^ctr[1]^key[0], lo1, hi0^ctr[3]^key[1], lo0);           
+DEVICE Counter round(Key &key, Counter &ctr) {
+  uint32_t hi0;
+  uint32_t hi1;
+  uint32_t lo0 = mulhilo(PHILOX_M4x32_0, ctr[0], &hi0);
+  uint32_t lo1 = mulhilo(PHILOX_M4x32_1, ctr[2], &hi1);
+  return Counter(hi1 ^ ctr[1] ^ key[0], lo1, hi0 ^ ctr[3] ^ key[1], lo0);
 }
+} // namespace
 
+class Phillox : public BaseRNG<Phillox> {
 
-class Phillox{
 public:
+  DEVICE Phillox(uint64_t seed_, uint64_t counter_)
+      : seed(seed_), counter(counter_) {}
 
-    DEVICE Phillox(uint64_t seed_, uint64_t counter_) : 
-        seed(seed_), counter(counter_)
-    {
+  template <typename T = uint32_t> DEVICE T draw() {
+    auto out = generate();
 
-    }
+    static_assert(std::is_same_v<T, uint32_t> || std::is_same_v<T, uint64_t>);
+    if constexpr (std::is_same_v<T, uint32_t>)
+      return out[0];
 
-    template <typename T = int>
-    DEVICE T draw(){
-        if constexpr (std::is_integral_v<T>){
-            return urand<T>();
-        }
-        else{
-            return urand<uint64_t>() / static_cast<T>(std::numeric_limits<uint64_t>::max()); 
-        }
-    }
-
-    DEVICE void fill_random(int *array, int N){
-
-    }
+    uint64_t res =
+        (static_cast<uint64_t>(out[0]) << 32) | static_cast<uint64_t>(out[1]);
+    return static_cast<uint64_t>(res);
+  }
 
 private:
-    DEVICE Counter generate(){
-        Key key{(uint32_t)(seed>>32), (uint32_t)(seed & 0xFFFFFFFF)}; 
-        // The counter takes first 2 values from internal counter, next 2 from
-        // what the user provided during instantiation. The internal counter helps
-        // to avoid forcing user to increment counter each time a number is 
-        // generated.
-        Counter ctr{(uint32_t)(_ctr>>32), (uint32_t)(_ctr & 0xFFFFFFFF), 
-            (uint32_t)(counter>>32), (uint32_t)(counter & 0xFFFFFFFF)};
+  DEVICE Counter generate() {
+    Key key{(uint32_t)(seed >> 32), (uint32_t)(seed & 0xFFFFFFFF)};
+    // The counter takes first 2 values from internal counter, next 2 from
+    // what the user provided during instantiation. The internal counter helps
+    // to avoid forcing user to increment counter each time a number is
+    // generated.
+    Counter ctr{(uint32_t)(_ctr >> 32), (uint32_t)(_ctr & 0xFFFFFFFF),
+                (uint32_t)(counter >> 32), (uint32_t)(counter & 0xFFFFFFFF)};
 
-        for(int r=0; r<10; r++){
-            if(r>0) bumpkey(key);
-            ctr = round(key, ctr);
-        }
-        _ctr++;
-        return ctr;
+    for (int r = 0; r < 10; r++) {
+      if (r > 0)
+        bumpkey(key);
+      ctr = round(key, ctr);
     }
+    _ctr++;
+    return ctr;
+  }
 
-    template <typename T>
-    DEVICE T urand(){
-        Counter out = generate();
-        if constexpr (sizeof(T)<=4) return static_cast<T>(out[0]);
-
-        uint64_t ret = (static_cast<uint64_t>(out[0]) << 32) | static_cast<uint64_t>(out[1]);
-        return static_cast<T>(ret);
-    }
-
-
-    const uint64_t seed;
-    const uint64_t counter;
-    // private counter to keep track of numbers generated by this instance of rng
-    uint64_t _ctr = 0; 
+  const uint64_t seed;
+  const uint64_t counter;
+  // private counter to keep track of numbers generated by this instance of rng
+  uint64_t _ctr = 0;
 };

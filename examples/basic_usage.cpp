@@ -3,73 +3,82 @@
 #include <vector>
 
 #include "phillox.h"
+#include "tyche.h"
 
 using std::cout;
 using std::endl;
 
-struct Particle{
-    const int global_id;
-    int counter = 0; 
-    double pos[3];
+struct Particle {
+  const int global_id;
+  int counter = 0;
+  double pos[3];
 
-    Particle (int id) : global_id(id) {}
+  Particle(int id) : global_id(id) {}
 };
 
-int main(){
-    Phillox rng(1, 0);
+int main() {
+  using RNG = Phillox; // Tyche
 
-    // Draw random numbers of many types
-    int a = rng.draw<int>();
-    auto b = rng.draw<long long int>();
-    double c = rng.draw<double>();
-    float f = rng.draw<float>();
+  RNG rng(1, 0);
 
-    cout<<a<<", "<<b<<" "<<c<<" "<<f<<endl;
+  // Draw random numbers of many types
+  int a = rng.rand<int>();
+  auto b = rng.rand<long long int>();
+  double c = rng.rand<double>();
+  float f = rng.rand<float>();
 
-    // Create independent streams of numbers in parallel
-    float data[16][10];
+  cout << a << ", " << b << " " << c << " " << f << endl;
 
-    #pragma omp parallel for 
-    for(int i=0; i<16; i++){
-        Phillox rng(i,0);
-        for(int j=0; j<10; j++) data[i][j] = rng.draw<float>();
-    }
+  // Create independent streams of numbers in parallel
+  float data[16][10];
 
-    for(int i=0; i<16; i++){
-        for(int j=0; j<10; j++) cout<<data[i][j]<<" ";
-        cout<<endl;
-    }
-    cout<<endl;
+#pragma omp parallel for
+  for (int i = 0; i < 16; i++) {
+    Phillox rng(i, 0);
+    for (int j = 0; j < 10; j++)
+      data[i][j] = rng.rand<float>();
+  }
 
-    // How to use a unique, independent RNG for each particle in a simulation- 
-    // The key is to maintain a counter variable for each particle, and 
-    // increment it each time the rng is instantiated. 
-    std::vector<Particle> system; 
-    for(int i=0; i<16; i++) system.emplace_back(i);
+  for (int i = 0; i < 16; i++) {
+    for (int j = 0; j < 10; j++)
+      cout << data[i][j] << " ";
+    cout << endl;
+  }
+  cout << endl;
 
-    // initialize
-    #pragma omp parallel for 
-    for(int i=0; i<16; i++){
-        Particle& p = system[i];
-        // if you don't increment p.counter here, you're going to get exactly 
-        // same values in next loop. 
-        Phillox rng1(p.global_id,p.counter++);
-        for(int j=0; j<3; j++) p.pos[j] = rng.draw<double>();
-    }
+  // How to use a unique, independent RNG for each particle in a simulation-
+  // The key is to maintain a counter variable for each particle, and
+  // increment it each time the rng is instantiated.
+  std::vector<Particle> system;
+  for (int i = 0; i < 16; i++)
+    system.emplace_back(i);
 
-    // a random step
-    #pragma omp parallel for 
-    for(int i=0; i<16; i++){
-        Particle& p = system[i];
-        Phillox rng2(p.global_id,p.counter++);
-        for(int j=0; j<3; j++) p.pos[j] += rng.draw<double>() / 10;
-    }
+// initialize
+#pragma omp parallel for
+  for (int i = 0; i < 16; i++) {
+    Particle &p = system[i];
+    // if you don't increment p.counter here, you're going to get exactly
+    // same values in the next loop.
+    Phillox rng1(p.global_id, p.counter++);
+    for (int j = 0; j < 3; j++)
+      p.pos[j] = rng.rand<double>();
+  }
 
-    for(int i=0; i<16; i++){
-        Particle& p = system[i];
-        for(int j=0; j<3; j++) cout<<p.pos[j]<<" ";
-        cout<<p.counter<<endl;
-    }
+// a random step
+#pragma omp parallel for
+  for (int i = 0; i < 16; i++) {
+    Particle &p = system[i];
+    Phillox rng2(p.global_id, p.counter++);
+    for (int j = 0; j < 3; j++)
+      p.pos[j] += rng.rand<double>() / 10;
+  }
 
-    return 0;
+  for (int i = 0; i < 16; i++) {
+    Particle &p = system[i];
+    for (int j = 0; j < 3; j++)
+      cout << p.pos[j] << " ";
+    cout << p.counter << endl;
+  }
+
+  return 0;
 }

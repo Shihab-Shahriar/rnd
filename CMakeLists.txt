@@ -6,6 +6,7 @@ project(RND)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O3 -fopenmp")
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
 # add_subdirectory(src)
@@ -24,5 +25,4 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
 
-# Add any additional compilation flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O3 -fopenmp")
+
