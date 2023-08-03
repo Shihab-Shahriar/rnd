@@ -20,3 +20,22 @@
 [1] Claessen, Koen, and Michał H. Pałka. "Splittable pseudorandom number generators using cryptographic hashing." ACM SIGPLAN Notices 48, no. 12 (2013): 47-58.
 
 [2] L'ecuyer, Pierre, and Richard Simard. "TestU01: AC library for empirical testing of random number generators." ACM Transactions on Mathematical Software (TOMS) 33, no. 4 (2007): 1-40.
+
+
+## 08/03/2023
+
+### Current State
++ Added one more generator (Tyche).
++ Added more distributions (normal and gamma).
++ Refactored the code using CRTP- a base RNG class to inject common code in all generators.
++ Added examples:
+    + Basic Usage, How to generate PI in parallel
++ Few more tests. 
+
+
+### TODO
++ A writeup on literature review.
++ Add threfry generator. 
++ Add some statistical tests from Test01 suite 
+    + Test all generators using the "big crush" battery once done.
++ Documentation, CI pipeline.
