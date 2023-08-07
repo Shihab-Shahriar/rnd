@@ -22,20 +22,20 @@
 [2] L'ecuyer, Pierre, and Richard Simard. "TestU01: AC library for empirical testing of random number generators." ACM Transactions on Mathematical Software (TOMS) 33, no. 4 (2007): 1-40.
 
 
-## 08/03/2023
+## 08/07/2023
 
 ### Current State
-+ Added one more generator (Tyche).
-+ Added more distributions (normal and gamma).
++ Added 3 more generators- Tyche, Squares, Threefry (WIP).
++ Support for two sota statistical test suites added: TESTU01 and PractRand.
 + Refactored the code using CRTP- a base RNG class to inject common code in all generators.
+    + Added normal distributions (normal and gamma).
 + Added examples:
     + Basic Usage, How to generate PI in parallel
 + Few more tests. 
-
++ Began writing the outline of potential paper in bullet [points](https://docs.google.com/document/d/e/2PACX-1vQBQjIKm9oG2mufLpKI5uZOLZ7cLiEGABTQ4hC8LNSjYd-0e_9EIH4ftEDlammmbo-pHtJYgZ8orBNq/pub). 
 
 ### TODO
 + A writeup on literature review.
-+ Add threfry generator. 
-+ Add some statistical tests from Test01 suite 
-    + Test all generators using the "big crush" battery once done.
++ Find and add more generators.  
++ Test all generators using the "big crush" battery once done.
 + Documentation, CI pipeline.

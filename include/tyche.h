@@ -6,6 +6,7 @@
 
 class Tyche : public BaseRNG<Tyche> {
 public:
+  //FIXME: we have to init the seed to avoid bad cases
   Tyche(uint64_t seed, uint32_t idx) {
     a = static_cast<uint32_t>(seed >> 32);
     b = static_cast<uint32_t>(seed & 0xFFFFFFFFULL);
@@ -20,10 +21,14 @@ public:
     mix();
     if constexpr (std::is_same_v<T, uint32_t>)
       return b;
-    uint32_t tmp = b;
-    mix();
-    uint64_t res = (static_cast<uint64_t>(tmp) << 32) | b;
-    return static_cast<T>(res);
+    
+    else{
+      uint32_t tmp = b;
+      mix();
+      uint64_t res = (static_cast<uint64_t>(tmp) << 32) | b;
+      return static_cast<T>(res);
+    }
+
   }
 
 private:
