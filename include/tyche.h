@@ -4,6 +4,12 @@
 
 #include "base_state.hpp"
 
+namespace{
+  static inline uint32_t rotl(uint32_t value, unsigned int x) {
+    return (value << x) | (value >> (32 - x));
+  }
+}
+
 class Tyche : public BaseRNG<Tyche> {
 public:
   //FIXME: we have to init the seed to avoid bad cases
@@ -15,6 +21,7 @@ public:
     for (int i = 0; i < 20; i++) {
       mix();
     }
+    std::cout<<std::hex<<a<<" "<<b<<" "<<c<<" "<<d<<std::endl;
   }
 
   template <typename T = uint32_t> DEVICE T draw() {
@@ -34,13 +41,13 @@ public:
 private:
   void mix() {
     a += b;
-    d = (d ^ a) << 16;
+    d = rotl(d ^ a, 16);
     c += d;
-    b = (b ^ c) << 12;
+    b = rotl(b ^ c, 12);
     a += b;
-    d = (d ^ a) << 8;
+    d = rotl(d ^ a, 8);
     c += d;
-    b = (b ^ c) << 7;
+    b = rotl(b ^ c, 7);
   }
 
   uint32_t a, b;
