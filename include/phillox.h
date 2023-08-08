@@ -21,6 +21,7 @@ namespace {
 #define PHILOX_W32_1 ((uint32_t)0xBB67AE85)
 #endif
 
+// TODO: Move Counter & Key to util.h
 struct Counter {
   uint32_t v[4];
 
