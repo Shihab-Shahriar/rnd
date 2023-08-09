@@ -61,7 +61,7 @@ int main() {
     // same values in the next loop.
     Phillox rng1(p.global_id, p.counter++);
     for (int j = 0; j < 3; j++)
-      p.pos[j] = rng.rand<double>();
+      p.pos[j] = rng1.rand<double>();
   }
 
 // a random step
@@ -70,7 +70,7 @@ int main() {
     Particle &p = system[i];
     Phillox rng2(p.global_id, p.counter++);
     for (int j = 0; j < 3; j++)
-      p.pos[j] += rng.rand<double>() / 10;
+      p.pos[j] += rng2.rand<double>() / 10;
   }
 
   for (int i = 0; i < 16; i++) {

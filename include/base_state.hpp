@@ -7,7 +7,15 @@
 #include <type_traits>
 #include <cmath>
 
-#define DEVICE
+
+#ifdef __CUDA_ARCH__
+  #define DEVICE __host__ __device__
+#elif defined(__HIP_DEVICE_COMPILE__)
+  #define DEVICE __device__ __host__
+#else
+  #define DEVICE 
+#endif
+
 
 /*
 RNG is the random number generator class. It must contain two public methods,

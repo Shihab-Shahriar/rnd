@@ -4,11 +4,12 @@
 #include "../include/tyche.h"
 #include "../include/squares.h"
 #include "../include/phillox.h"
+#include "../include/threefry.h"
 
 
 int main()
 {
-    using RNG = Squares;
+    using RNG = Threefry;
 
 
     RNG rng(0, 0);
