@@ -24,7 +24,8 @@ bit random unsigned int from its stream.
 */
 template <typename RNG> class BaseRNG {
 public:
-  template <typename T = float> DEVICE T rand() {
+  template <typename T = float> 
+  DEVICE T rand() {
     if constexpr (std::is_integral_v<T>) {
       if constexpr (sizeof(T) <= 4) {
         auto x = gen().template draw<uint32_t>();
@@ -32,7 +33,7 @@ public:
       } else
         return static_cast<T>(gen().template draw<uint64_t>());
     } else {
-      return gen().template draw<uint64_t>() /
+      return static_cast<T>(gen().template draw<uint64_t>()) /
              static_cast<T>(std::numeric_limits<uint64_t>::max());
     }
   }
@@ -85,7 +86,7 @@ public:
     }
 
 private:
-  RNG &gen() { return *static_cast<RNG *>(this); }
+  DEVICE RNG &gen() { return *static_cast<RNG *>(this); }
 };
 
 #endif

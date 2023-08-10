@@ -12,7 +12,7 @@ website at: https://squaresrng.wixsite.com/rand
 
 #define K 0xc58efd154ce32f6d                                           
 
-inline static uint32_t squares32(uint64_t ctr, uint64_t key) {
+inline static DEVICE uint32_t squares32(uint64_t ctr, uint64_t key) {
 
    uint64_t x, y, z;
 
@@ -39,7 +39,7 @@ inline static uint32_t squares32(uint64_t ctr, uint64_t key) {
 *                                                                          *
 \**************************************************************************/
 
-inline static uint64_t squares64(uint64_t ctr, uint64_t key) {
+inline static DEVICE uint64_t squares64(uint64_t ctr, uint64_t key) {
 
    uint64_t t, x, y, z;
 
@@ -67,7 +67,7 @@ a known good key (defined above "K") by multiplying it with that key.
 
 class Squares: public BaseRNG<Squares>{
 public:
-    Squares(uint64_t _seed, uint32_t _ctr)
+    DEVICE Squares(uint64_t _seed, uint32_t _ctr)
     :  seed((_seed + 1) * K)
     {
         ctr = static_cast<uint64_t>(_ctr) << 32;

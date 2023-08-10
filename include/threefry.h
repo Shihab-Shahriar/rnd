@@ -36,7 +36,7 @@ struct Key2 {
 class Threefry: public BaseRNG<Threefry>{
 public:
 
-    Threefry(uint64_t _seed, uint32_t _ctr)
+    DEVICE Threefry(uint64_t _seed, uint32_t _ctr)
     : seed(_seed),
       counter(static_cast<uint64_t>(_ctr) << 32)
     {
