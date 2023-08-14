@@ -1,3 +1,6 @@
+#ifndef SQUARES_H
+#define SQUARES_H
+
 #include <stdint.h>
 
 #include "base_state.hpp"
@@ -84,3 +87,5 @@ private:
     const uint64_t seed;
     uint64_t ctr = 0;
 };
+
+#endif // SQUARES_H

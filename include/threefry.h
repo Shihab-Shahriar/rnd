@@ -1,3 +1,6 @@
+#ifndef THREEFRY_H
+#define THREEFRY_H
+
 #include <array>
 #include <cstdint>
 #include <iostream>
@@ -109,3 +112,5 @@ private:
     uint32_t _ctr = 0;
 
 };
+
+#endif // THREEFRY_H

@@ -1,3 +1,6 @@
+#ifndef TYCHE_H
+#define TYCHE_H
+
 #include <cstdint>
 #include <iostream>
 #include <limits>
@@ -53,3 +56,5 @@ private:
   uint32_t c = 2654435769;
   uint32_t d = 1367130551;
 };
+
+#endif // TYCHE_H
