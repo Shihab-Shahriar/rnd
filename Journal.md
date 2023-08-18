@@ -39,3 +39,21 @@
 + Find and add more generators.  
 + Test all generators using the "big crush" battery once done.
 + Documentation, CI pipeline.
+
+
+## 08/18/2023
+
+### Current State
++ Worked on two benchmarks:
+    + Simple random number generation
+    + Ray tracing benchmark [Ray Tracing in One Weekend](https://github.com/Shihab-Shahriar/raytracinginoneweekendincuda.git)
+    + [Results] (https://docs.google.com/document/d/1M2MOQyT3K2ruOe3H6zVaSdfhsKcMKbUmFh9kdW75mqM/edit?usp=sharing)
+    + Setup cuda profiling for benchmarks.
+
++ Started writing the basic structure of the paper [link](https://docs.google.com/document/d/1M2MOQyT3K2ruOe3H6zVaSdfhsKcMKbUmFh9kdW75mqM/edit?usp=sharing)
++ Setup documentation generation.
+
+### TODO
++ A writeup on literature review.
++ Compare with clRNG library (and any other good baselines)
++ Start on documentaion. 
