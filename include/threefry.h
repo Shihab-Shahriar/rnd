@@ -13,8 +13,6 @@ namespace {
 #define NROUNDS 20
 #define SKEIN_KS_PARITY32         0x1BD11BDA
 
-const uint32_t R32x2[8] = {13, 15, 26, 6, 17, 29, 16, 24};
-
 
 DEVICE uint32_t rotl32(uint32_t x, uint32_t N){
     return (x << (N & 31)) | (x >> ((32-N) & 31));
@@ -72,7 +70,7 @@ private:
 
         for(int i=0; i<NROUNDS; i++){
             x0 += x1;
-            x1 = rotl32(x1, R32x2[i%8]);
+            x1 = rotl32(x1, get_constant(i%8));
             x1 ^= x0;
 
             if(i==3){
@@ -104,6 +102,20 @@ private:
         _ctr++;
         return Key2(x0, x1);
 
+    }
+
+
+    int get_constant(const int index) const {
+        switch (index) {
+            case 0: return 13;
+            case 1: return 15;
+            case 2: return 26;
+            case 3: return 6;
+            case 4: return 17;
+            case 5: return 29;
+            case 6: return 16;
+            case 7: return 24;
+        }
     }
 
     //TODO: Optimize away the internal counter. Use one counter state. 
