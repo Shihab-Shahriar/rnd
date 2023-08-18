@@ -105,7 +105,7 @@ private:
     }
 
 
-    int get_constant(const int index) const {
+    DEVICE int get_constant(const int index) const {
         switch (index) {
             case 0: return 13;
             case 1: return 15;
