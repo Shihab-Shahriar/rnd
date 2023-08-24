@@ -17,13 +17,15 @@ jobs:
        uses: actions/checkout@v3
 
      - name: Create build directory
-       run: mkdir build && cd build
+       run: mkdir build
 
      - name: CMake Configure
-       run: cmake ../
+       run: cmake -B build 
 
      - name: Build project
+       working-directory: ${{github.workspace}}/build
        run: make -j4
 
      - name: Run tests
+       working-directory: ${{github.workspace}}/build
        run: ctest -j2
