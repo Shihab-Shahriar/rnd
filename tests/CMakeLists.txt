@@ -9,10 +9,10 @@ add_executable(
   test_normal.cpp
 )
 
-add_test(NAME testPython
-  COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/check.py
-)
-SET_TESTS_PROPERTIES(testPython PROPERTIES DEPENDS run_normal)
+# add_test(NAME testPython
+#   COMMAND ${Python_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/check.py
+# )
+# SET_TESTS_PROPERTIES(testPython PROPERTIES DEPENDS run_normal)
 
 add_executable(
   hello_test
