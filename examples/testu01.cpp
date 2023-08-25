@@ -15,7 +15,7 @@ extern "C" {
 // based on: https://www.pcg-random.org/posts/how-to-test-with-testu01.html
 
 
-const char* gen_name = "Phillox";  // TestU01 doesn't like colons!!?!
+const char* gen_name = "Phillox";  
 using RNG = Phillox;
 
 uint32_t gen32()
@@ -48,7 +48,7 @@ uint32_t gen32_rev()
 }
 
 
-int main (int argc, char** argv)
+int main ()
 {
     // Config options for generator output
     bool reverseBits = false;

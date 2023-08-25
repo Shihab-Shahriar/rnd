@@ -115,6 +115,7 @@ private:
             case 5: return 29;
             case 6: return 16;
             case 7: return 24;
+            default: return 24;
         }
     }
 

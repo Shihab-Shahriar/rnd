@@ -17,6 +17,12 @@ include(FetchContent)
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   enable_testing()
   add_subdirectory(tests)
+  
+  # Statistical Tests
+  # To test using TESTU01, set the TESTU01 variable to the path it's installed at
+  set(TESTU01 /home/shihab/codes/TestU01)
+  message(STATUS "TESTU01 is: ${TESTU01}")
+  
   add_subdirectory(examples)
 
   FetchContent_Declare(
@@ -28,10 +34,6 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
   FetchContent_MakeAvailable(googletest)
 
-
-  # Statistical Tests
-  # To test using TESTU01, set the TESTU01 variable to the path it's installed at
-  set(TESTU01 /home/shihab/codes/TestU01)
 
   # To test using PractRand, pipe the output of build/examples/pract_rand to 
   # `RNG_test` with stdin32 option. For example-

@@ -57,3 +57,19 @@
 + A writeup on literature review.
 + Compare with clRNG library (and any other good baselines)
 + Start on documentaion. 
+
+## 08/18/2023
+
+### This week
++ Optimized Phillox generator enough that it virtually ties with nvidia's cuRAND library.
+    + Important since this is what everyones uses, and I'll set this as the default.
+    + Most benchmarks will also be run using this.
++ Setup github Continious Integration (CI) pipeline to automatically test after each push.
++ In the midst of writing brownian dynamics code.
+    + Cell list implementation is buggy.
+
+
+### TODO
++ A writeup on literature review (again).
++ Compare with Random123 and clRNG library.
++ Write docs, and generate them using github actions and push to a website (optional).
