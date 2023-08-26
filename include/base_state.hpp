@@ -26,21 +26,32 @@ template <typename RNG> class BaseRNG {
 public:
   template <typename T = float> 
   DEVICE T rand() {
-    if constexpr (std::is_integral_v<T>) {
-      if constexpr (sizeof(T) <= 4) {
-        auto x = gen().template draw<uint32_t>();
+    if constexpr (sizeof(T) <= 4){
+      const uint32_t x = gen().template draw<uint32_t>();
+      if constexpr (std::is_integral_v<T>) 
         return static_cast<T>(x);
-      } else
-        return static_cast<T>(gen().template draw<uint64_t>());
-    } else {
-      return static_cast<T>(gen().template draw<uint64_t>()) /
-             static_cast<T>(std::numeric_limits<uint64_t>::max());
+      else 
+        return uniform<float, uint32_t>(x);
+    }
+    else{
+      const uint64_t x = gen().template draw<uint64_t>();
+      if constexpr (std::is_integral_v<T>) 
+        return static_cast<T>(x);
+      else 
+        return uniform<double, uint64_t>(x);
     }
   }
 
   template <typename T = float> DEVICE void fill_random(T *array, const int N) {
     for (int i = 0; i < N; i++)
       array[i] = rand<T>();
+  }
+
+  template <typename Ftype, typename Utype>
+  __inline__ DEVICE Ftype uniform(const Utype in) const {
+    constexpr Ftype factor = Ftype(1.)/(Ftype(~static_cast<Utype>(0)) + Ftype(1.));
+    constexpr Ftype halffactor = Ftype(0.5)*factor;
+    return Utype(in)*factor + halffactor;
   }
 
   template <typename T = float> DEVICE T randn() {
@@ -86,7 +97,7 @@ public:
     }
 
 private:
-  DEVICE RNG &gen() { return *static_cast<RNG *>(this); }
+  DEVICE __inline__ RNG &gen() { return *static_cast<RNG *>(this); }
 };
 
 #endif
