@@ -73,3 +73,7 @@
 + A writeup on literature review (again).
 + Compare with Random123 and clRNG library.
 + Write docs, and generate them using github actions and push to a website (optional).
+
+
+## 08/31/2023
++ Tried removing the classes from Phillox to see if it improves performance: 4.05 -> 3.95 seconds.
