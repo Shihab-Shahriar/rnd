@@ -24,6 +24,7 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   message(STATUS "TESTU01 is: ${TESTU01}")
   
   add_subdirectory(examples)
+  add_subdirectory(benchmarks)
 
   FetchContent_Declare(
     googletest
