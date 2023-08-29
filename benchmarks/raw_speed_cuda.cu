@@ -31,7 +31,7 @@ __global__ void measure_speed_cuda_kernel(uint32_t *global_sum_dev, int N) {
 
 
 template<typename RNG>
-double measure_speed_cuda() {
+double measure_speed_cuda(int numSMs) {
     using namespace std::chrono;
     uint32_t global_sum = 0;
     uint32_t *global_sum_dev;
@@ -43,9 +43,11 @@ double measure_speed_cuda() {
     auto start = high_resolution_clock::now();
 
     // Launch the CUDA Kernel
-    int numBlocks = 256;
+    int numBlocks = numSMs * 4;
     int numThreadsPerBlock = 256;
-    measure_speed_cuda_kernel<RNG><<<numBlocks, numThreadsPerBlock>>>(global_sum_dev, N);
+    int nums_per_thread = N / (numBlocks * numThreadsPerBlock);
+    measure_speed_cuda_kernel<RNG><<<numBlocks, numThreadsPerBlock>>> \
+        (global_sum_dev, nums_per_thread);
 
     cudaDeviceSynchronize();
 
@@ -56,7 +58,7 @@ double measure_speed_cuda() {
 
     cudaFree(global_sum_dev);
 
-    global_sum &= 1;  // avoid polluting the output
+    //global_sum &= 1;  // avoid polluting the output
 
     // Total gigabytes produced
     double total_gb = N * sizeof(uint32_t) / 1e9;
@@ -70,18 +72,24 @@ double measure_speed_cuda() {
 }
 
 int main(){
+    cudaDeviceProp deviceProp;
+    int device;
+    cudaGetDevice(&device); // Get current device
+    cudaGetDeviceProperties(&deviceProp, device);
 
-    cout<<"Phillox: "<<endl;
-    measure_speed_cuda<Phillox>();
+    std::cout << "Number of Streaming Multiprocessors (SMs): " << deviceProp.multiProcessorCount << std::endl;
 
     cout<<"Threefry: "<<endl;
-    measure_speed_cuda<Threefry>();
+    measure_speed_cuda<Threefry>(deviceProp.multiProcessorCount);
+
+    cout<<"Phillox: "<<endl;
+    measure_speed_cuda<Phillox>(deviceProp.multiProcessorCount);
 
     cout<<"Squares: "<<endl;
-    measure_speed_cuda<Squares>();
+    measure_speed_cuda<Squares>(deviceProp.multiProcessorCount);
 
     cout<<"Tyche: "<<endl;
-    measure_speed_cuda<Tyche>();
+    measure_speed_cuda<Tyche>(deviceProp.multiProcessorCount);
 
     return 0;
 }

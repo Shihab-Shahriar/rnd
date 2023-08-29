@@ -18,10 +18,6 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   enable_testing()
   add_subdirectory(tests)
   
-  # Statistical Tests
-  # To test using TESTU01, set the TESTU01 variable to the path it's installed at
-  set(TESTU01 /home/shihab/codes/TestU01)
-  message(STATUS "TESTU01 is: ${TESTU01}")
   
   add_subdirectory(examples)
   add_subdirectory(benchmarks)
