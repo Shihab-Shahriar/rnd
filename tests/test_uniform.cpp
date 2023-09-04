@@ -4,6 +4,9 @@
 using std::cout;
 using std::endl;
 
+// TODO: Add std::is_trivially_copyable and std::is_trivially_destructible tests for all generator types
+
+
 TEST(RNG, basic) {
   Phillox rng(42, 0);
   EXPECT_NE(rng.rand<long long int>(), rng.rand<long long int>());

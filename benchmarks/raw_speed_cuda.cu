@@ -1,6 +1,10 @@
-#include <cuda_runtime.h>
 #include <iostream>
 #include <chrono>
+
+#include <cuda_runtime.h>
+#include <cub/cub.cuh>
+#include <cuda.h>
+
 
 #include "phillox.h"
 #include "threefry.h"
@@ -9,56 +13,65 @@
 
 using std::cout;
 using std::endl;
+using namespace std::chrono;
 
 const int N = 268435456; // no of 32 bits integers required for 1 GB data
+const int BLOCKSIZE = 256;
 
 template<typename RNG>
-__global__ void measure_speed_cuda_kernel(uint32_t *global_sum_dev, int N) {
+__global__ void measure_speed_cuda_kernel(uint32_t *global_sum_dev, int num_per_thread) {
     int idx = blockIdx.x * blockDim.x + threadIdx.x;
-    int stride = blockDim.x * gridDim.x;
     uint32_t sum = 0;
 
-    // Assuming the RNG class has been defined to work in device code
     RNG rng(12345 + idx, 0);
 
-    for (int i = idx; i < N; i += stride) {
-        sum += rng.template draw<uint32_t>();
+    for (int i = 0; i < num_per_thread; i ++) {
+        auto tmp = rng.template draw<uint32_t>();
+        sum += tmp;
+        if(tmp==81) i++;
     }
 
-    // Atomic add to the global sum
-    atomicAdd(global_sum_dev, sum);
+
+    // All these to make sure `sum` doesn't get optimized away
+    typedef cub::BlockReduce<uint32_t, BLOCKSIZE> BlockReduceT; 
+    __shared__ typename BlockReduceT::TempStorage temp_storage;
+
+    uint32_t result;
+    if(idx < N) result = BlockReduceT(temp_storage).Sum(sum);
+
+    if(threadIdx.x == 0) {
+        global_sum_dev[blockIdx.x] = result;   
+    }
 }
 
 
 template<typename RNG>
-double measure_speed_cuda(int numSMs) {
-    using namespace std::chrono;
-    uint32_t global_sum = 0;
+double measure_speed_cuda(int numSMs, bool warmup=false) {
+    // Launch configuration doesn't imitate random123
+    int numBlocks = numSMs * 8;
+    int numThreadsPerBlock = BLOCKSIZE;
+
+    uint32_t *global_sum;
     uint32_t *global_sum_dev;
 
     // Allocate memory for global_sum on the device
-    cudaMalloc((void **)&global_sum_dev, sizeof(uint32_t));
-    cudaMemcpy(global_sum_dev, &global_sum, sizeof(uint32_t), cudaMemcpyHostToDevice);
+    global_sum = (uint32_t*) malloc(sizeof(uint32_t) * numBlocks);
+    cudaMalloc((void **)&global_sum_dev, sizeof(uint32_t) * numBlocks);
 
+    int nums_per_thread = N / (numBlocks * numThreadsPerBlock);
     auto start = high_resolution_clock::now();
 
-    // Launch the CUDA Kernel
-    int numBlocks = numSMs * 4;
-    int numThreadsPerBlock = 256;
-    int nums_per_thread = N / (numBlocks * numThreadsPerBlock);
     measure_speed_cuda_kernel<RNG><<<numBlocks, numThreadsPerBlock>>> \
         (global_sum_dev, nums_per_thread);
-
     cudaDeviceSynchronize();
 
     auto stop = high_resolution_clock::now();
     auto duration = duration_cast<microseconds>(stop - start);
 
-    cudaMemcpy(&global_sum, global_sum_dev, sizeof(uint32_t), cudaMemcpyDeviceToHost);
-
+    cudaMemcpy(global_sum, global_sum_dev, sizeof(uint32_t)*numBlocks, cudaMemcpyDeviceToHost);
     cudaFree(global_sum_dev);
+    free(global_sum);
 
-    //global_sum &= 1;  // avoid polluting the output
 
     // Total gigabytes produced
     double total_gb = N * sizeof(uint32_t) / 1e9;
@@ -67,7 +80,8 @@ double measure_speed_cuda(int numSMs) {
     // Speed: GB/s
     double speed = total_gb / time_taken;
 
-    std::cout << "Speed: " << speed << " GB/s " << global_sum << std::endl;
+
+    if(!warmup) std::cout << "Speed: " << speed << " GB/s " << global_sum[0] << std::endl;
     return duration.count();
 }
 
@@ -79,11 +93,12 @@ int main(){
 
     std::cout << "Number of Streaming Multiprocessors (SMs): " << deviceProp.multiProcessorCount << std::endl;
 
-    cout<<"Threefry: "<<endl;
-    measure_speed_cuda<Threefry>(deviceProp.multiProcessorCount);
 
     cout<<"Phillox: "<<endl;
     measure_speed_cuda<Phillox>(deviceProp.multiProcessorCount);
+
+    cout<<"Threefry: "<<endl;
+    measure_speed_cuda<Threefry>(deviceProp.multiProcessorCount);
 
     cout<<"Squares: "<<endl;
     measure_speed_cuda<Squares>(deviceProp.multiProcessorCount);

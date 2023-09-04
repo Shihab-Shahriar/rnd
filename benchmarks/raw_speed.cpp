@@ -14,21 +14,23 @@
 
 using std::cout;
 using std::endl;
+using namespace std::chrono;
 
 const int N = 268435456; // no of 32 bits integers required for 1 GB data
 
 template<typename RNG>
 double measure_speed(){
-
-    using namespace std::chrono;
     RNG rng(12345, 0);
 
     auto start = high_resolution_clock::now();
 
-    // sum the generated values to avoid getting the compiler to optimize the code away
-    uint64_t sum = 0;
+    // `sum`: don't let the compiler throw away entire loop
+    uint32_t sum = 0; 
     for(int i = 0; i < N; ++i){
-        sum += rng.template draw<uint32_t>();
+        auto out = rng.template draw<uint32_t>();
+        sum  += out;
+        // don't let the compiler unroll this loop
+        if(out == 81) i++;
     }
 
     auto stop = high_resolution_clock::now();
@@ -53,9 +55,6 @@ double measure_speed(){
 
 template<typename RNG>
 double measure_speed_openmp(){
-
-    using namespace std::chrono;
-    RNG rng(12345, 0);
     uint64_t global_sum = 0; // Global sum
 
     auto start = high_resolution_clock::now();
@@ -67,13 +66,14 @@ double measure_speed_openmp(){
         int thread_id = omp_get_thread_num();
         int local_N = N / omp_get_num_threads();
         //cout<<local_N<<endl;
-        uint64_t sum = 0;
+        uint32_t sum = 0;
         
-        RNG rng(12345 + thread_id, 0);  // Initialize with different keys
-
-        #pragma omp for
+        RNG rng(12345 + thread_id, 0);  
         for(int i = 0; i < local_N; ++i){
-            sum += rng.template draw<uint32_t>();
+            auto out = rng.template draw<uint32_t>();
+            sum  += out;
+            // don't let the compiler unroll this loop
+            if(out == 81) i++;
         }
         
         #pragma omp critical
