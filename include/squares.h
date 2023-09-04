@@ -9,13 +9,13 @@
 namespace {
 
 /*
-These two functions below were taken directly from the author's
+These two functions below were copied from the author's
 website at: https://squaresrng.wixsite.com/rand
 */
 
 #define K 0xc58efd154ce32f6d                                           
 
-inline static DEVICE uint32_t squares32(uint64_t ctr, uint64_t key) {
+inline DEVICE uint32_t squares32(uint64_t ctr, uint64_t key) {
 
    uint64_t x, y, z;
 
@@ -31,18 +31,8 @@ inline static DEVICE uint32_t squares32(uint64_t ctr, uint64_t key) {
 
 }
 
-/**************************************************************************\
-*                                                                          *
-*  Five round counter-based middle square (64-bit output)                  *
-*                                                                          *
-*  squares64(ctr,key) - returns 64-bit unsigned int [0,0xffffffffffffffff] *
-*                                                                          *
-*  The result of the fourth round is xored into the fifth round to produce * 
-*  a 64-bit output.                                                        *
-*                                                                          *
-\**************************************************************************/
 
-inline static DEVICE uint64_t squares64(uint64_t ctr, uint64_t key) {
+inline DEVICE uint64_t squares64(uint64_t ctr, uint64_t key) {
 
    uint64_t t, x, y, z;
 

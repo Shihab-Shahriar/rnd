@@ -8,7 +8,7 @@
 #include "base_state.hpp"
 
 namespace{
-  static inline DEVICE uint32_t rotl(uint32_t value, unsigned int x) {
+  inline DEVICE uint32_t rotl(uint32_t value, unsigned int x) {
     return (value << x) | (value >> (32 - x));
   }
 }
@@ -37,11 +37,10 @@ public:
       uint64_t res = (static_cast<uint64_t>(tmp) << 32) | b;
       return static_cast<T>(res);
     }
-
   }
 
 private:
-  DEVICE void mix() {
+  inline DEVICE void mix() {
     a += b;
     d = rotl(d ^ a, 16);
     c += d;
