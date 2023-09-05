@@ -2,20 +2,10 @@
 #define BASE_STATE_H
 
 #include <cstdint>
-#include <iostream>
 #include <limits>
 #include <type_traits>
-#include <cmath>
 
-
-#ifdef __CUDA_ARCH__
-  #define DEVICE __host__ __device__
-#elif defined(__HIP_DEVICE_COMPILE__)
-  #define DEVICE __device__ __host__
-#else
-  #define DEVICE 
-#endif
-
+#include "util.h"
 
 /*
 RNG is the random number generator class. It must contain two public methods,
@@ -62,9 +52,9 @@ public:
 
     T u = rand<T>();
     T v = rand<T>();
-    T r = std::sqrt(-2.0 * std::log(u));
+    T r = rnd::sqrt(T(-2.0) * rnd::log(u));
     T theta = v * M_PI2;
-    return r * std::cos(theta);
+    return r * rnd::cos(theta);
   }
 
   template <typename T = float>
@@ -74,25 +64,26 @@ public:
 
   // https://www.hongliangjie.com/2012/12/19/how-to-generate-gamma-random-variables/
   template<typename T=float>
-    DEVICE inline T gamma(T alpha, T b){
-        T d = alpha - (1./3.);
-        T c = 1. / std::sqrt(9. * d);
-        T v, x;
-        while(true){
-            do{
-                x = randn<T>();
-                v = 1.0 + c * x;
-            }
-            while (v <= 0.);
-            v = v*v*v;
-            T u = rand<T>();
+  DEVICE inline T gamma(T alpha, T b){
+      T d = alpha - T((1./3.));
+      T c = T(1.) / rnd::sqrt(9.f * d);
+      T v, x;
+      while(true){
+          do{
+              x = randn<T>();
+              v = T(1.0) + c * x;
+          }
+          while (v <= T(0.));
+          v = v*v*v;
+          T u = rand<T>();
 
-            const T x2 = x*x;
-            if (u < 1.0 - 0.0331 * x2 *x2) return (d * v * b);
+          const T x2 = x*x;
+          if (u < 1.0f - 0.0331f * x2 *x2) 
+            return (d * v * b);
 
-            if (std::log(u) < 0.5 * x2 + d * (1.0 - v + std::log(v))) 
-                return (d * v * b);
-        }
+          if (rnd::log(u) < 0.5f * x2 + d * (1.0f - v + rnd::log(v))) 
+              return (d * v * b);
+      }
     }
 
 private:

@@ -6,6 +6,7 @@ project(RND)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O3 -fopenmp")
 
 include_directories(${PROJECT_SOURCE_DIR}/include)
@@ -32,9 +33,7 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   FetchContent_MakeAvailable(googletest)
 
 
-  # To test using PractRand, pipe the output of build/examples/pract_rand to 
-  # `RNG_test` with stdin32 option. For example-
-  # `./examples/pract_rand | ./RNG_test stdin32`
+
 endif()
 
 
