@@ -55,21 +55,20 @@ public:
   }
 
   template <typename T = float> DEVICE T randn() {
-    // Implements marsaglia Polar method
+    // Implements box-muller method
     // TODO: we can generate two numbers here instead of one
     static_assert(std::is_floating_point_v<T>);
+    constexpr T M_PI2 = 2 * M_PI;
 
-    while (true) {
-      auto U = 2.0 * rand<T>() - 1.0;
-      auto V = 2.0 * rand<T>() - 1.0;
-      auto S = U * U + V * V;
-      if (S <= 1.0)
-        return U * std::sqrt(-2.0 * std::log(S) / S);
-    }
+    T u = rand<T>();
+    T v = rand<T>();
+    T r = std::sqrt(-2.0 * std::log(u));
+    T theta = v * M_PI2;
+    return r * std::cos(theta);
   }
 
   template <typename T = float>
-  DEVICE T randn(const double &mean, const double &std_dev = 1.0) {
+  DEVICE T randn(const T mean, const T std_dev = 1.0) {
     return mean + randn<T>() * std_dev;
   }
 
