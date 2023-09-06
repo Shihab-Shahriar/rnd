@@ -13,7 +13,8 @@ include_directories(${PROJECT_SOURCE_DIR}/include)
 
 include(FetchContent)
 
-
+# Only build tests, examples and benchmarks if this isn't compiled
+# as a dependecy of another project.
 # Thanks to: https://www.foonathan.net/2022/06/cmake-fetchcontent/
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   enable_testing()
@@ -31,14 +32,20 @@ if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   # For Windows: Prevent overriding the parent project's compiler/linker settings
   set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
   FetchContent_MakeAvailable(googletest)
-
-
-
 endif()
 
 
-add_library(crng INTERFACE)
-target_include_directories(crng
+option(TESTU01 "Builds TestU01 test suite" OFF)
+# if TESTU01 is enabled, TESTU01 library path must be set
+if(TESTU01)
+  if(NOT TESTU01_PATH)
+    message(FATAL_ERROR "TESTU01_PATH must be set to TestU01 library location if TESTU01 is enabled")
+  endif()
+endif()
+
+
+add_library(cbrng INTERFACE)
+target_include_directories(cbrng
     INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
