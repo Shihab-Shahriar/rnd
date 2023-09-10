@@ -18,7 +18,7 @@ namespace rnd{
 // NOTE: nvcc compiler replaces floating point variants with cuda built-in versions
 // NOTE: floating point variants are not part of std namespace for some reason
 
-constexpr uint32_t DEFAULT_GLOBAL_SEED = 0xAAAAAAAA;  // equals number of 0 and 1 bits
+constexpr uint32_t DEFAULT_GLOBAL_SEED = 0xAAAAAAAA;  // equal number of 0 and 1 bits
 
 template <typename T> 
 inline DEVICE T sin(T x) {

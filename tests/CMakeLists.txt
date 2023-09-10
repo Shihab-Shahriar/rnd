@@ -28,12 +28,14 @@ gtest_discover_tests(normal)
 
 # Statistical tests, not run through gtest framework
 add_executable(pract_rand pract_rand.cpp)
+add_executable(pract_rand_multi pract_rand_multistream.cpp)
+
 if(DEFINED TESTU01)
     message(STATUS "Building TESTU01 statistical test suite")
     link_directories(${TESTU01_PATH}/lib)
-    add_executable(testu01_exec testu01.cpp)
-    target_link_libraries(testu01_exec testu01 probdist mylib)
-    target_include_directories(testu01_exec PUBLIC ${TESTU01_PATH}/include)
+    add_executable(testu01_serial testu01.cpp)
+    target_link_libraries(testu01_serial testu01 probdist mylib)
+    target_include_directories(testu01_serial PUBLIC ${TESTU01_PATH}/include)
 
     add_executable(testu01_multi testu01-multistream.cpp)
     target_link_libraries(testu01_multi testu01 probdist mylib)

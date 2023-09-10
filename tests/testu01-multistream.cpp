@@ -50,7 +50,7 @@ void init_generators(bool k_stride = 0, bool c_stride = 1){
 
 void populate_buffer(){
     for(int i = 0; i < NS; i++){
-        for(int i = 0; i < C; i++){
+        for(int j = 0; j < C; j++){
             buffer.push_back(generators[i].draw<uint32_t>());
         }
     }
