@@ -29,38 +29,38 @@ extern "C" {
 #include "../include/tyche.h"
 #include "../include/squares.h"
 #include "../include/phillox.h"
-
+#include "../include/threefry.h"
 
 // Control parameters for this test program.
-const char* gen_name = "Phillox";  
-using RNG = Phillox;
 const int C = 3; // C numbers from per stream
 const int NS = 100; // from NS streams
 // end
 
 std::vector<uint32_t> buffer;
-std::vector<RNG> generators;
+int ctr = 0;
 
-// We keep either key or counter constant, and increment other by 1
-void init_generators(bool k_stride = 0, bool c_stride = 1){
-    for(int i = 0; i < NS; i++){
-        generators.emplace_back(i*k_stride, i*c_stride);
-    }
-}
-
+template <typename RNG>
 void populate_buffer(){
+    std::vector<RNG> generators;
+    for(int i = 0; i < NS; i++){
+        generators.emplace_back(i, ctr);
+    }
+
     for(int i = 0; i < NS; i++){
         for(int j = 0; j < C; j++){
-            buffer.push_back(generators[i].draw<uint32_t>());
+            buffer.push_back(generators[i].template draw<uint32_t>());
         }
     }
     std::reverse(buffer.begin(), buffer.end());
 }
 
+
+template <typename RNG>
 uint32_t gen32()
 {
     if(buffer.empty()){
-        populate_buffer();
+        populate_buffer<RNG>();
+        ctr++;
     }
     uint32_t res = buffer.back();
     buffer.pop_back();
@@ -85,45 +85,67 @@ inline uint32_t rev32(uint32_t v)
     return v;
 }
 
+template <typename RNG>
 uint32_t gen32_rev()
 {
-    return rev32(gen32());
+    return rev32(gen32<RNG>());
 }
 
 
-int main ()
-{
-    // Config options for generator output
+int main(int argc, char* argv[]) {
+    if (argc != 3) {
+        std::cout << "Please provide generator name and crush level" << std::endl;
+        return 1;
+    }
+
+    std::string arg = argv[1];
+    std::string crush_level = argv[2];
     bool reverseBits = false;
 
-    // Name of the generator
+    std::cout << "Generating multi-stream for: " << arg << std::endl;
 
-    std::string genName = gen_name;
+    unif01_Gen* gen;
+    if(arg == "philox"){
+        gen = unif01_CreateExternGenBits((char*) arg.c_str(),
+                                   reverseBits ? gen32<Phillox> : gen32_rev<Phillox>);
+    }
+    else if(arg == "tyche"){
+        gen = unif01_CreateExternGenBits((char*) arg.c_str(),
+                                   reverseBits ? gen32<Tyche> : gen32_rev<Tyche>);
+    }
+    else if(arg == "squares"){
+        gen = unif01_CreateExternGenBits((char*) arg.c_str(),
+                                   reverseBits ? gen32<Squares> : gen32_rev<Squares>);
+    }
+    else if(arg == "threefry"){
+        gen = unif01_CreateExternGenBits((char*) arg.c_str(),
+                                   reverseBits ? gen32<Threefry> : gen32_rev<Threefry>);
+    }
+    else{
+        std::cout << "Invalid argument." << std::endl;
+        return 1;
+    }
 
-    printf("Testing %s:\n", genName.c_str());
-    fflush(stdout);
-
-    // Create multiple streams. Here, seed=0, counter is incremented.
-    init_generators(0, 1);
-
-    // Create multiple streams. Here, counter=0, seed is incremented.
-    //init_generators(1, 0);
-
-    // Create a generator for TestU01.
-    unif01_Gen* gen =
-        unif01_CreateExternGenBits((char*) genName.c_str(),
-                                   reverseBits ? gen32 : gen32_rev);
+        
 
     // Run tests.
 
-    // bbattery_SmallCrush(gen);
-    // fflush(stdout);
-    
-    bbattery_Crush(gen);
-    fflush(stdout);
-    
-    //bbattery_BigCrush(gen);
-    //fflush(stdout);
+    if(crush_level == "small"){
+        bbattery_SmallCrush(gen);
+        fflush(stdout);
+    }
+    else if(crush_level == "crush"){
+        bbattery_Crush(gen);
+        fflush(stdout);
+    }
+    else if(crush_level == "big"){
+        bbattery_BigCrush(gen);
+        fflush(stdout);
+    }
+    else{
+        std::cout << "Invalid crush level." << std::endl;
+        return 1;
+    }
 
     // Clean up.
     unif01_DeleteExternGenBits(gen);
