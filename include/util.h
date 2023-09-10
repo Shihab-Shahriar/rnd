@@ -50,7 +50,36 @@ inline DEVICE T sqrt(T x) {
         return std::sqrt(x);
 }
 
-}
+
+template <typename T>
+struct vec2{
+    T x, y;
+};
+
+template <typename T>
+struct vec3{
+    T x, y, z;
+};
+
+template <typename T>
+struct vec4{
+    T x, y, z, w;
+};
+
+// for GPU, better to be explicit about the type
+using uint2 = rnd::vec2<uint32_t>;
+using uint3 = rnd::vec3<uint32_t>;
+using uint4 = rnd::vec4<uint32_t>;
+
+using float2 = rnd::vec2<float>;
+using float3 = rnd::vec3<float>;
+using float4 = rnd::vec4<float>;
+
+using double2 = rnd::vec2<double>;
+using double3 = rnd::vec3<double>;
+using double4 = rnd::vec4<double>;
+
+} // namespace rnd
 
 
 

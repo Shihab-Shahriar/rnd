@@ -38,7 +38,7 @@ public:
   }
 
   template <typename Ftype, typename Utype>
-  __inline__ DEVICE Ftype uniform(const Utype in) const {
+  inline DEVICE Ftype uniform(const Utype in) const {
     constexpr Ftype factor = Ftype(1.)/(Ftype(~static_cast<Utype>(0)) + Ftype(1.));
     constexpr Ftype halffactor = Ftype(0.5)*factor;
     return Utype(in)*factor + halffactor;
@@ -57,8 +57,23 @@ public:
     return r * rnd::cos(theta);
   }
 
+  // More efficient version of randn(), generates 2 floating point numbers at once
+  template <typename T = float> 
+  DEVICE rnd::vec2<T> randn2() {
+    // Implements box-muller method
+    // TODO: we can generate two numbers here instead of one
+    static_assert(std::is_floating_point_v<T>);
+    constexpr T M_PI2 = 2 * M_PI;
+
+    T u = rand<T>();
+    T v = rand<T>();
+    T r = rnd::sqrt(T(-2.0) * rnd::log(u));
+    T theta = v * M_PI2;
+    return {r * rnd::cos(theta), r * rnd::sin(theta)};
+  }
+
   template <typename T = float>
-  DEVICE T randn(const T mean, const T std_dev = 1.0) {
+  DEVICE T randn(const T mean, const T std_dev) {
     return mean + randn<T>() * std_dev;
   }
 

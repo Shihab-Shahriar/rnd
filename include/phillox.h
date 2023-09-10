@@ -63,6 +63,19 @@ public:
     return static_cast<uint64_t>(res);
   }
 
+  rnd::uint4 draw_int4() {
+    generate();
+    return rnd::uint4{_out[0], _out[1], _out[2], _out[3]};
+  }
+
+  rnd::float4 draw_float4() {
+    generate();
+    return rnd::float4{uniform<float, uint32_t>(_out[0]),
+                       uniform<float, uint32_t>(_out[1]),
+                       uniform<float, uint32_t>(_out[2]),
+                       uniform<float, uint32_t>(_out[3])};
+  }
+
 private:
   DEVICE void generate() {
     uint32_t key[2] = {seed_hi, seed_lo};

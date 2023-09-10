@@ -27,7 +27,10 @@ int main() {
   double c = rng.rand<double>();
   float f = rng.rand<float>();
 
-  cout << a << ", " << b << " " << c << " " << f << endl;
+  rnd::float4 f4 = rng.draw_float4();
+
+  cout << a << ", " << b << " " << c << " " << f << " " << f4.x << " " << f4.y
+       << " " << f4.z << " " << f4.w << endl;
 
   // Create independent streams of numbers in parallel
   float data[16][10];

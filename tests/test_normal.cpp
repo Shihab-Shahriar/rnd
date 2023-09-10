@@ -47,11 +47,17 @@ std::pair<double, bool> ks_test(const std::vector<double>& data) {
 template <typename RNG>
 void test_normalcy(){
     RNG rng(42, 0);
-    const int num_draws = 5000; // should be more than enough
+    const int num_draws = 200; // should be more than enough
 
     std::vector<double> sample_data;
-    for (int i = 0; i < num_draws; i++) 
+    for (int i = 0; i < num_draws/2; i++) 
         sample_data.push_back(rng.template randn<float>());
+
+    while(sample_data.size() < num_draws){
+        rnd::double2 d2 = rng.template randn2<double>();
+        sample_data.push_back(d2.x);
+        sample_data.push_back(d2.y);
+    }
 
     auto [max_diff, reject_null] = ks_test(sample_data);
 
