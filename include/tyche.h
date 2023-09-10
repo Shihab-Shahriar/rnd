@@ -15,11 +15,11 @@ namespace{
 
 class Tyche : public BaseRNG<Tyche> {
 public:
-  //FIXME: we have to init the seed to avoid bad cases
-  DEVICE Tyche(uint64_t seed, uint32_t idx) {
+  DEVICE Tyche(uint64_t seed, uint32_t ctr, uint32_t global_seed=rnd::DEFAULT_GLOBAL_SEED) {
+    seed = seed ^ global_seed;
     a = static_cast<uint32_t>(seed >> 32);
     b = static_cast<uint32_t>(seed & 0xFFFFFFFFULL);
-    d = d ^ idx;
+    d = d ^ ctr;
 
     for (int i = 0; i < 20; i++) {
       mix();

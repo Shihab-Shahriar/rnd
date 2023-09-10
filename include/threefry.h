@@ -37,10 +37,11 @@ struct Key2 {
 class Threefry: public BaseRNG<Threefry>{
 public:
 
-    DEVICE Threefry(uint64_t _seed, uint32_t _ctr)
-    : seed(_seed),
-      counter(static_cast<uint64_t>(_ctr) << 32)
+    DEVICE Threefry(uint64_t seed, uint32_t ctr, uint32_t global_seed=rnd::DEFAULT_GLOBAL_SEED)
+    : seed(seed ^ global_seed),
+      counter(static_cast<uint64_t>(ctr) << 32)
     {
+
     }
 
     template <typename T = uint32_t> DEVICE T draw() {

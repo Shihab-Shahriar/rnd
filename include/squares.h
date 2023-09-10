@@ -49,21 +49,27 @@ inline DEVICE uint64_t squares64(uint64_t ctr, uint64_t key) {
    return t ^ ((x*x + y) >> 32);             /* round 5 */
 
 }
-}
 
 /*
 In Squares, since the seed (i.e. key) has to have certain properties to 
 generate good random numbers, we can't allow user to set arbritray seed.
 To avoid the pitfall of weak user supplied seed, we combine that seed with
-a known good key (defined above "K") by multiplying it with that key. 
+a known good key (defined above as "K") by multiplying it with that key. 
 */
+inline DEVICE uint64_t hash_seed(uint64_t seed){
+    return (seed + 1) * K;
+}
+
+}
+
+
 
 class Squares: public BaseRNG<Squares>{
 public:
-    DEVICE Squares(uint64_t _seed, uint32_t _ctr)
-    :  seed((_seed + 1) * K)
+    DEVICE Squares(uint64_t seed, uint32_t ctr, uint32_t global_seed=rnd::DEFAULT_GLOBAL_SEED)
+    :  seed(hash_seed(seed) ^ global_seed)
     {
-        ctr = static_cast<uint64_t>(_ctr) << 32;
+        ctr = static_cast<uint64_t>(ctr) << 32;
     }
 
     template <typename T = uint32_t> DEVICE T draw() {
