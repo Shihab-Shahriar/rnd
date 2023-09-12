@@ -16,7 +16,6 @@ const int NS = 100; // from NS streams
 // end
 
 
-// We keep either key or counter constant, and increment other by 1
 template <typename RNG>
 void init_generators(std::vector<RNG> &generators, const int ctr){
     for(int i = 0; i < NS; i++){
@@ -42,10 +41,8 @@ void generate_multi_stream(){
     for(int ctr = 0; ; ctr++){
         init_generators(generators, ctr);
         populate_buffer(generators, buffer);
-        for(int i = 0; i < C*NS; i++){
-            uint32_t value = buffer[i];
-            fwrite((void*) &value, sizeof(value), 1, stdout);
-        }
+        fwrite((void*) buffer.data(), sizeof(buffer[0]), NS * C, stdout);
+        
         // clear both vectors
         buffer.clear();
         generators.clear();

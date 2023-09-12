@@ -8,44 +8,24 @@
 
 #include "base_state.hpp"
 
-namespace {
-
-#define NROUNDS 20
-#define SKEIN_KS_PARITY32         0x1BD11BDA
-
-
-DEVICE uint32_t rotl32(uint32_t x, uint32_t N){
-    return (x << (N & 31)) | (x >> ((32-N) & 31));
-}
-
-struct Key2 {
-  uint32_t v[2];
-
-  DEVICE Key2(uint32_t a, uint32_t b) {
-    v[0] = a;
-    v[1] = b;
-  }
-
-  DEVICE uint32_t &operator[](int i) { return v[i]; }
-
-  DEVICE uint32_t operator[](int i) const { return v[i]; }
-};
-
-
-}
 
 class Threefry: public BaseRNG<Threefry>{
 public:
 
     DEVICE Threefry(uint64_t seed, uint32_t ctr, uint32_t global_seed=rnd::DEFAULT_GLOBAL_SEED)
     : seed(seed ^ global_seed),
-      counter(static_cast<uint64_t>(ctr) << 32)
+      counter(ctr)
     {
 
     }
 
     template <typename T = uint32_t> DEVICE T draw() {
-        auto out = round();
+        uint32_t out[2];
+        round(static_cast<uint32_t>(seed >> 32),
+                                static_cast<uint32_t>(seed),
+                                counter,
+                                _ctr++,
+                                out);
 
         static_assert(std::is_same_v<T, uint32_t> || std::is_same_v<T, uint64_t>);
         if constexpr (std::is_same_v<T, uint32_t>)
@@ -58,18 +38,23 @@ public:
 
 private:
 
-    DEVICE Key2 round(){
+  DEVICE uint32_t rotl32(uint32_t x, uint32_t N){
+      return (x << (N & 31)) | (x >> ((32-N) & 31));
+  }
+
+
+  DEVICE void round(uint32_t ks0, uint32_t ks1, uint32_t counter, uint32_t _ctr, uint32_t* out){
         uint32_t x0, x1;
-        uint32_t ks0, ks1, ks2 = SKEIN_KS_PARITY32;
-        ks0 = (seed >> 32);                                                       
+        uint32_t ks2 = 0x1BD11BDA;
+                                                    
+                                                      
         x0  = counter + ks0;                                                  
         ks2 ^= ks0; 
 
-        ks1 = static_cast<uint32_t>(seed);                                                       
         x1  = _ctr + ks1;                                                  
         ks2 ^= ks1;
 
-        for(int i=0; i<NROUNDS; i++){
+        for(int i=0; i<20; i++){
             x0 += x1;
             x1 = rotl32(x1, get_constant(i%8));
             x1 ^= x0;
@@ -100,9 +85,8 @@ private:
                 x1 += 5;
             }
         } 
-        _ctr++;
-        return Key2(x0, x1);
-
+        out[0] = x0;
+        out[1] = x1;
     }
 
 
@@ -120,7 +104,6 @@ private:
         }
     }
 
-    //TODO: Optimize away the internal counter. Use one counter state. 
     const uint64_t seed;
     const uint32_t counter;
     uint32_t _ctr = 0;
