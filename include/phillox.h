@@ -87,7 +87,7 @@ private:
     // time a number is generated.
     
     _out[0] = 0x12345;
-    _out[1] = (uint32_t)(_ctr & 0xFFFFFFFF);
+    _out[1] = _ctr;
     _out[2] = initctr_hi;
     _out[3] = initctr_lo;
 
