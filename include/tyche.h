@@ -29,26 +29,37 @@ public:
   template <typename T = uint32_t> DEVICE T draw() {
     mix();
     if constexpr (std::is_same_v<T, uint32_t>)
-      return b;
+      return a;
     
     else{
-      uint32_t tmp = b;
+      uint32_t tmp = a;
       mix();
-      uint64_t res = (static_cast<uint64_t>(tmp) << 32) | b;
+      uint64_t res = (static_cast<uint64_t>(tmp) << 32) | a;
       return static_cast<T>(res);
     }
   }
 
 private:
-  inline DEVICE void mix() {
-    a += b;
-    d = rotl(d ^ a, 16);
-    c += d;
-    b = rotl(b ^ c, 12);
-    a += b;
-    d = rotl(d ^ a, 8);
-    c += d;
-    b = rotl(b ^ c, 7);
+  // inline DEVICE void mix() {
+  //   a += b;
+  //   d = rotl(d ^ a, 16);
+  //   c += d;
+  //   b = rotl(b ^ c, 12);
+  //   a += b;
+  //   d = rotl(d ^ a, 8);
+  //   c += d;
+  //   b = rotl(b ^ c, 7);
+  // }
+
+  inline DEVICE void mix(){
+    b = rotl(b, 7) ^ c;
+    c -= d;
+    d = rotl(d, 8) ^ a;
+    a -= b;
+    b = rotl(b, 12) ^ c;
+    c -= d;
+    d = rotl(d, 16) ^ a; 
+    a -= b;
   }
 
   uint32_t a, b;

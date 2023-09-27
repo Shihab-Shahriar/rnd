@@ -13,8 +13,7 @@ namespace {
 /*
 In Squares, since the seed (i.e. key) has to have certain properties to 
 generate good random numbers, we can't allow user to set arbritray seed.
-To avoid the pitfall of weak user supplied seed, we combine that seed with
-a known good key (defined above as "K") by multiplying it with that key. 
+To avoid the pitfall of weak user supplied seed, we need to hash that seed. 
 */
 // inline DEVICE uint64_t hash_seed(uint64_t seed){
 //     return (seed + 1) * K;
