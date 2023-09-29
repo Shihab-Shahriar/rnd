@@ -29,3 +29,12 @@ jobs:
      - name: Run tests
        working-directory: ${{github.workspace}}/build
        run: ctest -j2
+    
+     - name: Determine changed files
+       id: changed_files
+       run: echo "::set-output name=files_changed::$(git diff --name-only ${{ github.event.before }} ${{ github.sha }})"
+
+     - name: Store changed files
+       id: store_changed_files
+       run: echo "Changed files: ${{ steps.changed_files.outputs.files_changed }}"
+

@@ -11,7 +11,8 @@
 using std::cout;
 using std::endl;
 
-int main() {
+
+double compute_pi(){
   using RNG = Phillox;
   const int nsamples = 10000000;
   int total_samples;
@@ -38,6 +39,13 @@ int main() {
   }
 
   double pi_estimate = 4.0 * total_hits / total_samples;
+  return pi_estimate;
+}
+
+
+int main() {
+
+  double pi_estimate = compute_pi();
 
   cout << pi_estimate << endl;
 
