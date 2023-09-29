@@ -36,5 +36,5 @@ jobs:
 
      - name: Store changed files
        id: store_changed_files
-       run: echo "Changed files: ${{ steps.changed_files.outputs.files_changed }}"
+       run: echo "Changed files- ${{ steps.changed_files.outputs.files_changed }}"
 
